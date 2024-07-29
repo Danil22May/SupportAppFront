@@ -1,19 +1,26 @@
-import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
 function LoginForm() {
   const [username, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const { login } = useContext(AuthContext);
   const checkPassword = async (event) => {
     event.preventDefault();
-    const loginData = { username, password };
-    await axios.post("http://localhost:8080/api/v1/login", loginData);
-    localStorage.setItem("logged", true);
-    login();
-    setName("");
-    setPassword("");
+    if (username == "" && password == "") {
+      setError("All fields are required");
+    }
+    try {
+      const loginData = { username, password };
+      await axios.post("http://localhost:8080/api/v1/login", loginData);
+      localStorage.setItem("logged", true);
+      login();
+      setName("");
+      setPassword("");
+    } catch (error) {
+      setError("Wrong name or password");
+    }
   };
   return (
     <form
@@ -35,15 +42,13 @@ function LoginForm() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+      <span className="text-md font-semibold text-red-600">{error}</span>
       <button
         type="submit"
         className="h-8 rounded-md border border-gray-300 bg-blue-400 p-1 px-4 text-slate-900 shadow-sm transition-shadow hover:bg-blue-600 hover:text-white hover:shadow-md active:bg-blue-800 sm:h-10 sm:w-36"
       >
         Enter
       </button>
-      <div className="text-md text-blue-500 hover:text-blue-700 active:text-blue-950">
-        <Link to="/register">Not registered?</Link>
-      </div>
     </form>
   );
 }
